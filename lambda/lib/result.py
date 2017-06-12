@@ -1,19 +1,24 @@
 """
 Set build status to github
 """
+import logging
+
 import boto3
 
 from lib.status import set_status_to_github
 
 
-codebuild_client = boto3.client('codebuild')
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
 
+codebuild_client = boto3.client('codebuild')
 BUILD_STATUS_TO_GITHUB_STATUS = {
   'PENDING': 'pending',
   'IN_PROGRESS': 'pending',
   'FAILED': 'failure',
   'SUCCEEDED': 'success',
   'ERROR': 'error'}
+
 
 def get_build_status(build_id):
     """
@@ -23,6 +28,7 @@ def get_build_status(build_id):
         ids=[
             build_id
         ])
+    logger.info(str(builds))
     return builds[0]
 
 
