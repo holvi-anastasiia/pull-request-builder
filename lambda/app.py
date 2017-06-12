@@ -38,7 +38,8 @@ def handler(event, context):
         # Strange message type:
         # return error an skip
         return _error_response('Unknow message type')
-    return _success_response(data)
+    logger.info(str(data))
+    return _success_response()
 
 
 def _get_message_or_none(event):
@@ -73,8 +74,4 @@ def _success_response(data):
     """
     return {
         'statusCode': HTTP_200_OK,
-        'body': json.dumps(data),
-        'headers': {
-            'Content-Type': 'application/json',
-        },
     }
