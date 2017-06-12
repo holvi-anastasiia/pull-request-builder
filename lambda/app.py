@@ -1,6 +1,12 @@
+import json
+import logging
+
 from lib.build import trigger_build
 from lib.result import set_build_result
 
+
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
 
 HTTP_200_OK = 200
 HTTP_400_BAD_REQUEST = 400
@@ -13,6 +19,7 @@ def handler(event, context):
 
     Uses AWS SNS to pass messages
     """
+    logger.info(json.dumps(event))
     message = _get_message_or_none(event)
     if not message:
         # smth got wrong: retun error
@@ -44,7 +51,10 @@ def _get_message_or_none(event):
     sns = records[0].get('Sns')
     if not sns:
         return None
-    return sns.get('Message', None)
+    message = sns.get('Message')
+    if not message:
+    	return None
+    return json.loads(message)
 
 
 def _error_response(
@@ -61,7 +71,6 @@ def _success_response(data):
     """
     Helper to return success response
     """
-    import json
     return {
         'statusCode': HTTP_200_OK,
         'body': json.dumps(data),

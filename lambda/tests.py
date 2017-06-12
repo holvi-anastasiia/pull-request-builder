@@ -1,6 +1,7 @@
 """
 Smoke tests for github lambda
 """
+import json
 from mock import patch, MagicMock
 import unittest
 
@@ -33,7 +34,7 @@ class PullRequestBuilderSmokeTest(unittest.TestCase):
             'Records': [
                 {
                     'Sns': {
-                        'Message': message
+                        'Message': json.dumps(message)
                     }
                 }
             ]
