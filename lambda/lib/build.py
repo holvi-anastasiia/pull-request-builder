@@ -25,7 +25,6 @@ def trigger_build(source_version):
                 # TODO: get lambda value on the flight
                 'value': 'test',
             } 
-		],
+		])
 		# TODO: override buildspec
 		# according to build type (test or build)
-		buildspecOverride='buildspec-test.yaml')
