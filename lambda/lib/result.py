@@ -29,7 +29,7 @@ def get_build_status(build_id):
             build_id
         ])
     logger.info(str(builds))
-    return builds[0]
+    return builds['builds'][0]
 
 
 def set_build_result(build_id):

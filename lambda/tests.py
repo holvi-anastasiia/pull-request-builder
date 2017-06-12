@@ -41,13 +41,15 @@ class PullRequestBuilderSmokeTest(unittest.TestCase):
         }
 
     def generate_batch_build_return_value(self):
-        return [
-            {
-                'buildStatus': 'test-status',
-                'sourceVersion': 'test-version',
-                'id': 'test-id',
-            }
-        ]
+        return {
+            'builds': [
+                {
+                    'buildStatus': 'test-status',
+                    'sourceVersion': 'test-version',
+                    'id': 'test-id',
+                }
+            ]
+        }
 
     @patch('lib.build.codebuild_client.start_build')
     def test_correct_setup__build_is_triggered(
@@ -99,7 +101,7 @@ class PullRequestBuilderSmokeTest(unittest.TestCase):
         """
         # prepare mocks
         get_build_status.return_value = \
-            self.generate_batch_build_return_value()[0]
+            self.generate_batch_build_return_value()['builds'][0]
         github.Github.return_value = MagicMock()
         github.Github.return_value.get_repo.return_value.\
             get_commit.return_value.create_status.return_value = ''
