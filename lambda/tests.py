@@ -70,8 +70,7 @@ class PullRequestBuilderSmokeTest(unittest.TestCase):
                     # TODO: get lambda value on the flight
                     'value': 'test',
                 } 
-            ],
-            buildspecOverride='buildspec-test.yaml')
+            ])
 
     @patch('lib.result.set_status_to_github')
     @patch('lib.result.codebuild_client.batch_get_builds')
@@ -111,7 +110,7 @@ class PullRequestBuilderSmokeTest(unittest.TestCase):
         # verify github behaviour
         github.Github.return_value.get_repo.return_value.\
             get_commit.return_value.create_status.assert_called_with(
-                'test-status',
+                'pending',
                 'https://console.aws.amazon.com/codebuild/home?region=test-region#/builds/test-id/view/new',
                 'test-status')
         github.Github.return_value.get_repo.\
