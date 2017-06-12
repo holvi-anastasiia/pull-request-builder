@@ -46,9 +46,8 @@ Resources:
           - Effect: Allow
             Principal:
               Service:
-                - codebuild.us-east-1.amazonaws.com
-                - codebuild.us-west-2.amazonaws.com
                 - codebuild.eu-west-1.amazonaws.com
+                - codebuild.eu-central-1.amazonaws.com
             Action:
               - sts:AssumeRole
       Path: "/"
@@ -81,9 +80,9 @@ Resources:
       Environment:
         Type: linuxContainer
         ComputeType: BUILD_GENERAL1_SMALL
-        Image: aws/codebuild/nodejs:4.4.7
+        Image: aws/codebuild/python:2.7.10
       Source:
-        Location: https://github.com/tatums/aws-sam-example.git
+        Location: https://github.com/holvi-anastasiia/test-github-aws-integration
         Type: GITHUB
       TimeoutInMinutes: 10
 
@@ -126,11 +125,11 @@ Resources:
     Type: AWS::Lambda::Function
     Properties:
       FunctionName: !Sub ${AWS::StackName}
-      Handler: index.handler
+      Handler: app.handler
       Role: !GetAtt [IamRoleLambda, Arn]
       Code:
         ZipFile:
-          exports.handler = function(event, context, cb) { return cb(null, {message:'Hello World'}); };
+          ../dist/deployment.zip
       Environment:
         Variables:
           GITHUB_PROJECT_NAME:
@@ -139,7 +138,7 @@ Resources:
             Ref: GithubToken
           PROJECT_NAME:
             Ref: ProjectName
-      Runtime: nodejs4.3
+      Runtime: python2.7
       MemorySize: 1024
       Timeout: 30
 
