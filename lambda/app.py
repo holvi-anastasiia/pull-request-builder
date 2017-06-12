@@ -68,7 +68,7 @@ def _error_response(
         'body': error_message}
 
 
-def _success_response(data):
+def _success_response():
     """
     Helper to return success response
     """
