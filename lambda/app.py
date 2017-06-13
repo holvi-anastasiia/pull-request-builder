@@ -1,5 +1,6 @@
 import json
 import logging
+from time import sleep
 
 from lib.build import trigger_build
 from lib.result import set_build_result
@@ -31,6 +32,11 @@ def handler(event, context):
         # if smth goes wrong here
         data = trigger_build(message['after'])
     elif message.get('buildId'):
+    	# FIXME: this is totally ugly
+    	# we need to order CodeBuild and lambda 
+    	# so we first complete build project and only then
+    	# try to fetch results from lambda
+    	sleep(1)
         # deliberately fail with 500 error
         # if smth goes wrong here
         data = set_build_result(message['buildId'])
