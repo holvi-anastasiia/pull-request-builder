@@ -19,4 +19,4 @@ phases:
       - 'aws lambda update-function-code --function-name $LAMBDA --zip-file fileb://dist/deployment.zip'
   post_build:
     commands:
-      - 'aws sns publish --topic-arn arn:aws:sns:eu-west-1:072560318001:test-lambda-ci-cd --message "{\"buildId\": \"$CODEBUILD_BUILD_ID\"}"'"""
+      - 'aws sns publish --topic-arn arn:aws:sns:eu-west-1:072560318001:test-lambda-ci-cd --message "{\\"buildId\\": \\"$CODEBUILD_BUILD_ID\\"}"'"""
