@@ -45,7 +45,7 @@ def trigger_build(
                 'value': lambda_name,
             } 
         ],
-        buildspecOverride=buildspec_file_name)
+        buildspecOverride=buildspec_override)
 
 
 def _get_buildspec_override(
