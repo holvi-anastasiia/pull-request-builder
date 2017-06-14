@@ -55,13 +55,17 @@ class PullRequestBuilderSmokeTest(unittest.TestCase):
             ]
         }
 
+    @patch('lib.build._get_buildspec_override')
     @patch('lib.build.codebuild_client.start_build')
     def test_correct_setup_for_test__build_is_triggered(
-            self, start_build_mock):
+            self, start_build_mock, get_buildspec_override_mock):
         """
         Test that we trigger CodeBuild build
         with valid parameters
         """
+        get_buildspec_override_mock.side_effect = \
+            lambda lambda_name, file_name: file_name
+
         start_build_mock.return_value = ''
         response = handler(
             self.generate_message_to_trigger_build(), {})
@@ -79,13 +83,17 @@ class PullRequestBuilderSmokeTest(unittest.TestCase):
             ],
             buildspecOverride='buildspec-test.yml')
 
+    @patch('lib.build._get_buildspec_override')
     @patch('lib.build.codebuild_client.start_build')
     def test_correct_setup_for_build__build_is_triggered(
-            self, start_build_mock):
+            self, start_build_mock, get_buildspec_override_mock):
         """
         Test that we trigger CodeBuild build
         with valid parameters
         """
+        get_buildspec_override_mock.side_effect = \
+            lambda lambda_name, file_name: file_name
+
         start_build_mock.return_value = ''
         response = handler(
             self.generate_message_to_trigger_build(
