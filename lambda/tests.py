@@ -21,9 +21,13 @@ class PullRequestBuilderSmokeTest(unittest.TestCase):
         os.environ['GITHUB_LAMBDAS_REPO'] = 'test-repo'
         os.environ['AWS_REGION'] = 'test-region'
 
-    def generate_message_to_trigger_build(self):
+    def generate_message_to_trigger_build(
+            self, ref='refs/heads/test--test-1.0'):
         return self.generate_message_from_sns(
-                {'after': 'commit-hash'})
+                {
+                    'after': 'commit-hash',
+                    'ref': ref
+                })
 
     def generate_message_to_set_github_results(self):
         return self.generate_message_from_sns(
@@ -52,7 +56,7 @@ class PullRequestBuilderSmokeTest(unittest.TestCase):
         }
 
     @patch('lib.build.codebuild_client.start_build')
-    def test_correct_setup__build_is_triggered(
+    def test_correct_setup_for_test__build_is_triggered(
             self, start_build_mock):
         """
         Test that we trigger CodeBuild build
@@ -72,7 +76,33 @@ class PullRequestBuilderSmokeTest(unittest.TestCase):
                     # TODO: get lambda value on the flight
                     'value': 'test',
                 } 
-            ])
+            ],
+            buildspecOverride='buildspec-test.yml')
+
+    @patch('lib.build.codebuild_client.start_build')
+    def test_correct_setup_for_build__build_is_triggered(
+            self, start_build_mock):
+        """
+        Test that we trigger CodeBuild build
+        with valid parameters
+        """
+        start_build_mock.return_value = ''
+        response = handler(
+            self.generate_message_to_trigger_build(
+                ref='refs/tags/test--1.1'), {})
+        self.assertEqual(
+            response['statusCode'], HTTP_200_OK)
+        start_build_mock.assert_called_with(
+            projectName='test',
+            sourceVersion='commit-hash',
+            environmentVariablesOverride=[
+                {
+                    'name': 'LAMBDA',
+                    # TODO: get lambda value on the flight
+                    'value': 'test',
+                } 
+            ],
+            buildspecOverride='buildspec-build.yml')
 
     @patch('lib.result.set_status_to_github')
     @patch('lib.result.codebuild_client.batch_get_builds')
