@@ -65,7 +65,7 @@ def _get_buildspec_override(
         return buildspec_file.read()
 
 
-def get_buildspec_filename(
+def _get_buildspec_filename(
         lambda_name, file_name):
     """
     Generate full path to specified buildspec
