@@ -72,4 +72,4 @@ def _get_buildspec_filename(
     Generate full path to specified buildspec module
     """
     return '.'.join(
-        'buildspecs', lambda_name, file_name)
+        ('buildspecs', lambda_name, file_name))
