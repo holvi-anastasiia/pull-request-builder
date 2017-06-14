@@ -81,7 +81,7 @@ class PullRequestBuilderSmokeTest(unittest.TestCase):
                     'value': 'test',
                 } 
             ],
-            buildspecOverride='buildspec-test.yml')
+            buildspecOverride='buildspec-test')
 
     @patch('lib.build._get_buildspec_override')
     @patch('lib.build.codebuild_client.start_build')
@@ -110,7 +110,7 @@ class PullRequestBuilderSmokeTest(unittest.TestCase):
                     'value': 'test',
                 } 
             ],
-            buildspecOverride='buildspec-build.yml')
+            buildspecOverride='buildspec-build')
 
     @patch('lib.result.set_status_to_github')
     @patch('lib.result.codebuild_client.batch_get_builds')

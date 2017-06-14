@@ -22,6 +22,8 @@ def handler(event, context):
 
     Uses AWS SNS to pass messages
     """
+    import glob
+    logger.info(glob.glob('/var/**/*'))
     logger.info(json.dumps(event))
     message = _get_message_or_none(event)
     if not message:

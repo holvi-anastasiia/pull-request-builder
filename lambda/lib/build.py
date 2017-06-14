@@ -13,7 +13,7 @@ def trigger_deploy_build(commit, lambda_name):
     Trigger build and specify deploy config
     """
     return trigger_build(
-        commit, lambda_name, 'buildspec-build.yml')
+        commit, lambda_name, 'buildspec-build')
 
 
 def trigger_test_build(commit, lambda_name):
@@ -21,7 +21,7 @@ def trigger_test_build(commit, lambda_name):
     Trigger build and specifu test config
     """
     return trigger_build(
-        commit, lambda_name, 'buildspec-test.yml')
+        commit, lambda_name, 'buildspec-test')
 
 
 def trigger_build(
@@ -51,7 +51,7 @@ def trigger_build(
 def _get_buildspec_override(
         lambda_name, file_name):
     """
-    Read buildspec from specified file
+    Import buildspecs from buildspec module
 
     Dirs structure:
     -/ lambda
@@ -59,18 +59,17 @@ def _get_buildspec_override(
     -----/ lambda_name
     -------/ buildspec_file_name
     """
+    import importlib
     full_buildspec_name = \
         _get_buildspec_filename(lambda_name, file_name)
-    with open(full_buildspec_name) as buildspec_file:
-        return buildspec_file.read()
+    return importlib.import_module(
+            full_buildspec_name).YAML_CONFIG
 
 
 def _get_buildspec_filename(
         lambda_name, file_name):
     """
-    Generate full path to specified buildspec
+    Generate full path to specified buildspec module
     """
-    import os
-    from settings import BASE_PATH
-    return os.path.join(
-        BASE_PATH, 'buildspecs', lambda_name, file_name)
+    return '.'.join(
+        'buildspecs', lambda_name, file_name)

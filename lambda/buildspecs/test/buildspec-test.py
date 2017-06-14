@@ -1,4 +1,4 @@
-version: 0.2
+YAML_CONFIG = """version: 0.2
 
 env:
   variables:
@@ -16,4 +16,4 @@ phases:
       - 'coverage run --source=. -m unittest discover'
   post_build:
     commands:
-      - 'aws sns publish --topic-arn arn:aws:sns:eu-west-1:072560318001:test-lambda-ci-cd --message "{\"buildId\": \"$CODEBUILD_BUILD_ID\"}"'
+      - 'aws sns publish --topic-arn arn:aws:sns:eu-west-1:072560318001:test-lambda-ci-cd --message "{\"buildId\": \"$CODEBUILD_BUILD_ID\"}"'"""
