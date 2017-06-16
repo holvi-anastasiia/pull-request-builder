@@ -50,7 +50,7 @@ def handler(event, context):
         # and CodeBuild updates status with sufficient delay
         # IT IS UGLY AN D AD-HOC SOLUTION
         # WOULD BE REPLACED AFTER WE PASS POC STEP
-        sleep(60)
+        sleep(20)
         # deliberately fail with 500 error
         # if smth goes wrong here
         data = set_build_result(message['buildId'])
