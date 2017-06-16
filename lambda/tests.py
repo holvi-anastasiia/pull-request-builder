@@ -55,14 +55,17 @@ class PullRequestBuilderSmokeTest(unittest.TestCase):
             ]
         }
 
+    @patch('app.sleep')
     @patch('lib.build._get_buildspec_override')
     @patch('lib.build.codebuild_client.start_build')
     def test_correct_setup_for_test__build_is_triggered(
-            self, start_build_mock, get_buildspec_override_mock):
+            self, start_build_mock, get_buildspec_override_mock, sleep_mock):
         """
         Test that we trigger CodeBuild build
         with valid parameters
         """
+        # disable side effects
+        sleep_mock.return_value = None
         get_buildspec_override_mock.side_effect = \
             lambda lambda_name, file_name: file_name
 
@@ -83,14 +86,17 @@ class PullRequestBuilderSmokeTest(unittest.TestCase):
             ],
             buildspecOverride='buildspec-test')
 
+    @patch('app.sleep')
     @patch('lib.build._get_buildspec_override')
     @patch('lib.build.codebuild_client.start_build')
     def test_correct_setup_for_build__build_is_triggered(
-            self, start_build_mock, get_buildspec_override_mock):
+            self, start_build_mock, get_buildspec_override_mock, sleep_mock):
         """
         Test that we trigger CodeBuild build
         with valid parameters
         """
+        # disable side effects
+        sleep_mock.return_value = None
         get_buildspec_override_mock.side_effect = \
             lambda lambda_name, file_name: file_name
 
@@ -112,13 +118,16 @@ class PullRequestBuilderSmokeTest(unittest.TestCase):
             ],
             buildspecOverride='buildspec-build')
 
+    @patch('app.sleep')
     @patch('lib.result.set_status_to_github')
     @patch('lib.result.codebuild_client.batch_get_builds')
     def test_correct_setup__result_is_set(
-            self, batch_get_build_mock, set_status_to_github_mock):
+            self, batch_get_build_mock, set_status_to_github_mock, sleep_mock):
         """
         Test that we use github api correctly
         """
+        # disable side effects
+        sleep_mock.return_value = None
         set_status_to_github_mock.return_value = ''
         batch_get_build_mock.return_value = \
             self.generate_batch_build_return_value()
@@ -130,13 +139,16 @@ class PullRequestBuilderSmokeTest(unittest.TestCase):
         batch_get_build_mock.assert_called_with(ids=['1'])  
 
  
+    @patch('app.sleep')
     @patch('lib.status.github')
     @patch('lib.result.get_build_status')   
     def test_correct_setup__build_status_is_queried_correctly(
-            self, get_build_status, github):
+            self, get_build_status, github, sleep_mock):
         """
         Test that we request build status with correct parameters
         """
+        # disable side effects
+        sleep_mock.return_value = None
         # prepare mocks
         get_build_status.return_value = \
             self.generate_batch_build_return_value()['builds'][0]

@@ -45,10 +45,12 @@ def handler(event, context):
             commit=message['after'], lambda_name=lambda_name)
     elif message.get('buildId'):
         # FIXME: this is totally ugly
-        # we need to order CodeBuild and lambda
-        # so we first complete build project and only then
-        # try to fetch results from lambda
-        sleep(5)
+        # it is placed here cause there is no
+        # delay for sns queues or lambda
+        # and CodeBuild updates status with sufficient delay
+        # IT IS UGLY AN D AD-HOC SOLUTION
+        # WOULD BE REPLACED AFTER WE PASS POC STEP
+        sleep(60)
         # deliberately fail with 500 error
         # if smth goes wrong here
         data = set_build_result(message['buildId'])
