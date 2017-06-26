@@ -21,6 +21,18 @@ Neccessary scopes:
 - admin:repo_hook
 - repo
 
+### Package lambda to ```dist/deployment.zip```
+*The file name is hardcoded in cloudformation template*
+
+TODO: automate this
+```
+$ mkdir -p dist
+$ pip install -r lambda/requirements.txt -t ./dist
+$ cp -r lambda/lib ./dist
+$ cp lambda/app.py ./dist
+$ cd dist && zip -r deployment.zip *
+```
+
 #### ENV Varialbes
 
 ```
