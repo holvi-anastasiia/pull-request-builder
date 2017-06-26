@@ -11,6 +11,7 @@ of codebuild will invoke the lambda again to report the build result.
 
 AWS SNS integration is managed by CloudFormation template.
 
+![Data flow](https://github.com/holvi-anastasiia/pull-request-builder/blob/master/ci-schema.jpeg)
 
 ## Setup
 
