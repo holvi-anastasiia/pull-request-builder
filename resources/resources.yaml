@@ -80,9 +80,9 @@ Resources:
       Environment:
         Type: linuxContainer
         ComputeType: BUILD_GENERAL1_SMALL
-        Image: aws/codebuild/python:2.7.10
+        Image: aws/codebuild/eb-python-3.4-amazonlinux-64:2.1.6
       Source:
-        Location: https://github.com/holvi-anastasiia/test-github-aws-integration
+        Location: !Sub https://github.com/${GithubProjectName}
         Type: GITHUB
       TimeoutInMinutes: 10
 
@@ -132,15 +132,15 @@ Resources:
           ../dist/deployment.zip
       Environment:
         Variables:
-          GITHUB_PROJECT_NAME:
+          GITHUB_LAMBDAS_REPO:
             Ref: GithubProjectName
-          GITHUB_TOKEN:
+          GITHUB_OAUTH:
             Ref: GithubToken
           PROJECT_NAME:
             Ref: ProjectName
       Runtime: python2.7
       MemorySize: 1024
-      Timeout: 30
+      Timeout: 90
 
   IamRoleLambda:
     Type: AWS::IAM::Role
