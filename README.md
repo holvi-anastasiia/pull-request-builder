@@ -9,13 +9,17 @@ which then invokes the Lambda. The lambda will update github
 via the status api and set the status to pending. The last step
 of codebuild will invoke the lambda again to report the build result.
 
-Cloudformation will output the keys and SNS ARN needed for the
-github AWS SNS integration.
+AWS SNS integration is managed by CloudFormation template.
 
 
 ## Setup
 
 ### Requirements
+
+### Github Oauth token
+Neccessary scopes:
+- admin:repo_hook
+- repo
 
 #### ENV Varialbes
 
