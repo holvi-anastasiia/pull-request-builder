@@ -8,24 +8,24 @@ import boto3
 codebuild_client = boto3.client('codebuild')
 
 
-def trigger_deploy_build(commit, lambda_name):
+def trigger_deploy_build(source_version, lambda_name):
     """
     Trigger build and specify deploy config
     """
     return trigger_build(
-        commit, lambda_name, 'buildspec-build')
+        source_version, lambda_name, 'buildspec-build')
 
 
-def trigger_test_build(commit, lambda_name):
+def trigger_test_build(source_version, lambda_name):
     """
     Trigger build and specifu test config
     """
     return trigger_build(
-        commit, lambda_name, 'buildspec-test')
+        source_version, lambda_name, 'buildspec-test')
 
 
 def trigger_build(
-        commit, lambda_name, buildspec_file_name):
+        source_version, lambda_name, buildspec_file_name):
     """
     Trigger build for given source_version
 
@@ -37,7 +37,7 @@ def trigger_build(
     # return codebuild response for debug
     return codebuild_client.start_build(
         projectName=os.environ['PROJECT'],
-        sourceVersion=commit,
+        sourceVersion=source_version,
         environmentVariablesOverride=[
             {
                 'name': 'LAMBDA',

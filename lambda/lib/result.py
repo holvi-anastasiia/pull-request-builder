@@ -5,7 +5,7 @@ import logging
 
 import boto3
 
-from lib.status import set_status_to_github
+from lib.github_wrapper import set_status_to_github
 
 
 logger = logging.getLogger()

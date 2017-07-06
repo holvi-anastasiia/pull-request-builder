@@ -2,6 +2,7 @@
 GitHub API wrapper
 
 Used to set build status to github
+and generate url for archive with source code
 """
 import os
 
@@ -28,3 +29,15 @@ def _get_status_url(build_id):
     """
     return 'https://console.aws.amazon.com/codebuild/home?region=%s#/builds/%s/view/new' % (
         os.environ['AWS_REGION'], build_id)
+
+
+def get_archive_url(
+        github_reference):
+    """
+    Api wrapper for generating temporary url for zip file
+    with source code
+    """
+    g = github.Github(os.environ['GITHUB_OAUTH'])
+    repo = g.get_repo(os.environ['GITHUB_LAMBDAS_REPO'])
+    return repo.get_archive_link(
+        'zip', ref=github_reference)

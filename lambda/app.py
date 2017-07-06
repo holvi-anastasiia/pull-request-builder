@@ -2,9 +2,10 @@ import json
 import logging
 from time import sleep
 
-from lib.build import (
+from lib.codebuild_wrapper import (
     trigger_test_build,
     trigger_deploy_build)
+from lib.s3_wrapper import load_source_code_to_s3
 from lib.result import set_build_result
 
 
@@ -23,18 +24,18 @@ def handler(event, context):
     Uses AWS SNS to pass messages
     """
     import glob
-    logger.info(glob.glob('/var/**/*'))
-    logger.info(json.dumps(event))
     message = _get_message_or_none(event)
     if not message:
         # smth got wrong: retun error
         return _error_repponse('No sns message found')
-    # "after" has the numebr of last commit
+    # "after" has the number of last commit
     if message.get('after'):
         # deliberately fail with 500 error
         # if smth goes wrong here
         ref = message['ref']
         ref_type, lambda_name = _parse_github_reference(ref)
+        source_version = load_source_code_to_s3(
+            message['after'])
         if ref_type == 'tags':
             # trigger deployment on tag
             trigger_function = trigger_deploy_build
@@ -42,7 +43,8 @@ def handler(event, context):
             # trigger test by default
             trigger_function = trigger_test_build
         data = trigger_function(
-            commit=message['after'], lambda_name=lambda_name)
+            source_version=source_version, lambda_name=lambda_name)
+
     elif message.get('buildId'):
         # FIXME: this is totally ugly
         # it is placed here cause there is no

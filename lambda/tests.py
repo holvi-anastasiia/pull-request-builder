@@ -56,10 +56,13 @@ class PullRequestBuilderSmokeTest(unittest.TestCase):
         }
 
     @patch('app.sleep')
-    @patch('lib.build._get_buildspec_override')
-    @patch('lib.build.codebuild_client.start_build')
+    @patch('lib.codebuild_wrapper._get_buildspec_override')
+    @patch('app.load_source_code_to_s3')
+    @patch('lib.codebuild_wrapper.codebuild_client.start_build')
     def test_correct_setup_for_test__build_is_triggered(
-            self, start_build_mock, get_buildspec_override_mock, sleep_mock):
+            self, start_build_mock, 
+            load_source_code_to_s3_mock, 
+            get_buildspec_override_mock, sleep_mock):
         """
         Test that we trigger CodeBuild build
         with valid parameters
@@ -68,6 +71,8 @@ class PullRequestBuilderSmokeTest(unittest.TestCase):
         sleep_mock.return_value = None
         get_buildspec_override_mock.side_effect = \
             lambda lambda_name, file_name: file_name
+        load_source_code_to_s3_mock.side_effect = \
+            lambda github_ref: github_ref
 
         start_build_mock.return_value = ''
         response = handler(
@@ -87,10 +92,13 @@ class PullRequestBuilderSmokeTest(unittest.TestCase):
             buildspecOverride='buildspec-test')
 
     @patch('app.sleep')
-    @patch('lib.build._get_buildspec_override')
-    @patch('lib.build.codebuild_client.start_build')
+    @patch('lib.codebuild_wrapper._get_buildspec_override')
+    @patch('app.load_source_code_to_s3')
+    @patch('lib.codebuild_wrapper.codebuild_client.start_build')
     def test_correct_setup_for_build__build_is_triggered(
-            self, start_build_mock, get_buildspec_override_mock, sleep_mock):
+            self, start_build_mock, 
+            load_source_code_to_s3_mock, 
+            get_buildspec_override_mock, sleep_mock):
         """
         Test that we trigger CodeBuild build
         with valid parameters
@@ -99,6 +107,8 @@ class PullRequestBuilderSmokeTest(unittest.TestCase):
         sleep_mock.return_value = None
         get_buildspec_override_mock.side_effect = \
             lambda lambda_name, file_name: file_name
+        load_source_code_to_s3_mock.side_effect = \
+            lambda github_ref: github_ref
 
         start_build_mock.return_value = ''
         response = handler(
@@ -117,6 +127,65 @@ class PullRequestBuilderSmokeTest(unittest.TestCase):
                 } 
             ],
             buildspecOverride='buildspec-build')
+
+    @patch('lib.s3_wrapper.s3_client.upload_file')
+    @patch('lib.github_wrapper.github.Github')
+    def test_load_source_code_to_s3(
+            self, github_mock, upload_file_mock):
+        """
+        Test api usage in load_source_code_to_s3
+        function
+        """
+        # arrange os variables
+        import os
+        os.environ['SOURCE_CODE_S3_BUCKET'] = 's3-bucket'
+        os.environ['SOURCE_CODE_S3_KEY'] = 's3-key'
+
+        # set up mocks
+        github_mock.return_value.\
+            get_repo.return_value.get_archive_link.return_value = 'test-github-url'
+        upload_file_mock.return_value = {
+            'VersionId': 'test-s3'}
+
+        from lib.s3_wrapper import load_source_code_to_s3
+
+        version_id = load_source_code_to_s3('test-ref')
+
+        self.assertEqual(
+            version_id, 'test-s3')
+        upload_file_mock.assert_called_with(
+            'test-github-url', 's3-bucket', 's3-key')
+        github_mock.return_value.\
+            get_repo.return_value.get_archive_link.\
+                assert_called_with('zip', ref='test-ref')
+
+
+    @patch('app.sleep')
+    @patch('lib.codebuild_wrapper._get_buildspec_override')
+    @patch('app.load_source_code_to_s3')
+    @patch('lib.codebuild_wrapper.codebuild_client.start_build')
+    def test_load_source_code_to_s3_usage(
+            self, start_build_mock,
+            load_source_code_to_s3_mock,
+            get_buildspec_override_mock,
+            sleep_mock):
+        """
+        Test that we pass correct data to load_source_code_to_s3
+        method
+        """
+        # disable side effects
+        sleep_mock.return_value = None
+        get_buildspec_override_mock.side_effect = \
+            lambda lambda_name, file_name: file_name
+        load_source_code_to_s3_mock.side_effect = \
+            lambda github_ref: github_ref
+
+        start_build_mock.return_value = ''
+        response = handler(
+            self.generate_message_to_trigger_build(
+                ref='refs/tags/test--1.1'), {})
+        load_source_code_to_s3_mock.assert_called_with(
+            'commit-hash')
 
     @patch('app.sleep')
     @patch('lib.result.set_status_to_github')
@@ -140,7 +209,7 @@ class PullRequestBuilderSmokeTest(unittest.TestCase):
 
  
     @patch('app.sleep')
-    @patch('lib.status.github')
+    @patch('lib.github_wrapper.github')
     @patch('lib.result.get_build_status')   
     def test_correct_setup__build_status_is_queried_correctly(
             self, get_build_status, github, sleep_mock):
