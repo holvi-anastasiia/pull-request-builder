@@ -40,4 +40,5 @@ def get_archive_url(
     g = github.Github(os.environ['GITHUB_OAUTH'])
     repo = g.get_repo(os.environ['GITHUB_LAMBDAS_REPO'])
     return repo.get_archive_link(
-        'zip', ref=github_reference)
+        'zipball', # zip required by s3 
+        ref=github_reference)

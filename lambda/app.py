@@ -23,7 +23,7 @@ def handler(event, context):
 
     Uses AWS SNS to pass messages
     """
-    import glob
+    logger.info(json.dumps(event))
     message = _get_message_or_none(event)
     if not message:
         # smth got wrong: retun error
@@ -43,6 +43,7 @@ def handler(event, context):
             # trigger test by default
             trigger_function = trigger_test_build
         data = trigger_function(
+            commit=message['after'],
             source_version=source_version, lambda_name=lambda_name)
 
     elif message.get('buildId'):

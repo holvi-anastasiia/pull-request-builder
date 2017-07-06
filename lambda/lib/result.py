@@ -20,7 +20,7 @@ BUILD_STATUS_TO_GITHUB_STATUS = {
   'ERROR': 'error'}
 
 
-def get_build_status(build_id):
+def get_build_info(build_id):
     """
     Helper to fetch info about build from code build
     """
@@ -29,17 +29,37 @@ def get_build_status(build_id):
             build_id
         ])
     logger.info(str(builds))
-    return builds['builds'][0]
+    return builds
 
 
 def set_build_result(build_id):
     """
     Fetch bild result and send it back to github
     """
-    build_status = get_build_status(build_id)
+    build_info = get_build_info(build_id)
+    source_version = _get_initial_commit(build_info)
+    build_status = _try_fetch_build_status(build_info)
     return set_status_to_github(
         BUILD_STATUS_TO_GITHUB_STATUS.get(
             build_status['buildStatus'], 'pending'), 
         build_status['buildStatus'], # FIXME: generate build message
-        build_status['sourceVersion'],
+        source_version,
         build_status['id'])
+
+
+def _try_fetch_build_status(build_info):
+    """
+    Try to retrieve status from build
+    """
+    return build_info['builds'][0]
+
+
+def _get_initial_commit(build_status):
+    """
+    Try get github commit
+    from build env variables
+    """
+    variables = build_status['builds'][0]['environment']['environmentVariables']
+    for variable in variables:
+      if variable['name'] == 'GITHUB_COMMIT': return variable['value']
+    return None

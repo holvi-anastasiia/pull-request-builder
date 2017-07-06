@@ -8,24 +8,26 @@ import boto3
 codebuild_client = boto3.client('codebuild')
 
 
-def trigger_deploy_build(source_version, lambda_name):
+def trigger_deploy_build(
+        commit, source_version, lambda_name):
     """
     Trigger build and specify deploy config
     """
     return trigger_build(
-        source_version, lambda_name, 'buildspec-build')
+        commit, source_version, lambda_name, 'buildspec-build')
 
 
-def trigger_test_build(source_version, lambda_name):
+def trigger_test_build(
+        commit, source_version, lambda_name):
     """
     Trigger build and specifu test config
     """
     return trigger_build(
-        source_version, lambda_name, 'buildspec-test')
+        commit, source_version, lambda_name, 'buildspec-test')
 
 
 def trigger_build(
-        source_version, lambda_name, buildspec_file_name):
+        commit, source_version, lambda_name, buildspec_file_name):
     """
     Trigger build for given source_version
 
@@ -41,9 +43,15 @@ def trigger_build(
         environmentVariablesOverride=[
             {
                 'name': 'LAMBDA',
-                # TODO: get lambda value on the flight
                 'value': lambda_name,
-            } 
+            },
+            # WARNING: this is rather ugly hack
+            # since now we are getting code from s3
+            # we lose information about initail commit
+            {
+                'name': 'GITHUB_COMMIT',
+                'value': commit
+            }
         ],
         buildspecOverride=buildspec_override)
 

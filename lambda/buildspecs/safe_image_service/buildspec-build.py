@@ -4,9 +4,13 @@ env:
   variables:
     LAMBDA: "default"
     SNS_TOPIC_ARN: arn:aws:sns:eu-west-1:890057277545:LambdaDeployPipeline
+    GITHUB_COMMIT: "default"
 phases:
   install:
     commands:
+      # find directory with source code
+      # unfortunately github sends zipfile with inner dir
+      - cd $(find . -name "holvi*" -type d | sed 1q)
       - pip install -r requirements.txt
   pre_build:
     commands:
