@@ -48,6 +48,14 @@ class PullRequestBuilderSmokeTest(unittest.TestCase):
         return {
             'builds': [
                 {
+                    'environment': {
+                        'environmentVariables': [
+                            {
+                                'name': 'GITHUB_COMMIT',
+                                'value': 'test-github-commit'
+                            }
+                        ]
+                    },
                     'buildStatus': 'test-status',
                     'sourceVersion': 'test-version',
                     'id': 'test-id',
@@ -87,7 +95,11 @@ class PullRequestBuilderSmokeTest(unittest.TestCase):
                     'name': 'LAMBDA',
                     # TODO: get lambda value on the flight
                     'value': 'test',
-                } 
+                },
+                {
+                    'name': 'GITHUB_COMMIT', 
+                    'value': 'commit-hash'
+                }
             ],
             buildspecOverride='buildspec-test')
 
@@ -124,14 +136,20 @@ class PullRequestBuilderSmokeTest(unittest.TestCase):
                     'name': 'LAMBDA',
                     # TODO: get lambda value on the flight
                     'value': 'test',
-                } 
+                },
+                {
+                    'name': 'GITHUB_COMMIT', 
+                    'value': 'commit-hash'
+                }
             ],
             buildspecOverride='buildspec-build')
 
-    @patch('lib.s3_wrapper.s3_client.upload_file')
+    @patch('lib.s3_wrapper._load_code_zipfile')
+    @patch('lib.s3_wrapper.s3_client.put_object')
     @patch('lib.github_wrapper.github.Github')
     def test_load_source_code_to_s3(
-            self, github_mock, upload_file_mock):
+            self, github_mock, put_object_mock,
+            load_code_zipfile_mock):
         """
         Test api usage in load_source_code_to_s3
         function
@@ -144,8 +162,9 @@ class PullRequestBuilderSmokeTest(unittest.TestCase):
         # set up mocks
         github_mock.return_value.\
             get_repo.return_value.get_archive_link.return_value = 'test-github-url'
-        upload_file_mock.return_value = {
+        put_object_mock.return_value = {
             'VersionId': 'test-s3'}
+        load_code_zipfile_mock.return_value = 'test'
 
         from lib.s3_wrapper import load_source_code_to_s3
 
@@ -153,12 +172,15 @@ class PullRequestBuilderSmokeTest(unittest.TestCase):
 
         self.assertEqual(
             version_id, 'test-s3')
-        upload_file_mock.assert_called_with(
-            'test-github-url', 's3-bucket', 's3-key')
+        put_object_mock.assert_called_with(
+            Body='test',
+            Bucket='s3-bucket',
+            Key='s3-key')
         github_mock.return_value.\
             get_repo.return_value.get_archive_link.\
-                assert_called_with('zip', ref='test-ref')
-
+                assert_called_with(
+                    'zipball', # zip required by s3
+                    ref='test-ref')
 
     @patch('app.sleep')
     @patch('lib.codebuild_wrapper._get_buildspec_override')
@@ -207,20 +229,19 @@ class PullRequestBuilderSmokeTest(unittest.TestCase):
             response['statusCode'], HTTP_200_OK)
         batch_get_build_mock.assert_called_with(ids=['1'])  
 
- 
     @patch('app.sleep')
     @patch('lib.github_wrapper.github')
-    @patch('lib.result.get_build_status')   
+    @patch('lib.result.get_build_info')   
     def test_correct_setup__build_status_is_queried_correctly(
-            self, get_build_status, github, sleep_mock):
+            self, get_build_info, github, sleep_mock):
         """
         Test that we request build status with correct parameters
         """
         # disable side effects
         sleep_mock.return_value = None
         # prepare mocks
-        get_build_status.return_value = \
-            self.generate_batch_build_return_value()['builds'][0]
+        get_build_info.return_value = \
+            self.generate_batch_build_return_value()
         github.Github.return_value = MagicMock()
         github.Github.return_value.get_repo.return_value.\
             get_commit.return_value.create_status.return_value = ''
@@ -235,7 +256,7 @@ class PullRequestBuilderSmokeTest(unittest.TestCase):
                 'https://console.aws.amazon.com/codebuild/home?region=test-region#/builds/test-id/view/new',
                 'test-status')
         github.Github.return_value.get_repo.\
-            return_value.get_commit.assert_called_with('test-version')
+            return_value.get_commit.assert_called_with('test-github-commit')
 
 
 if __name__ == '__main__':
